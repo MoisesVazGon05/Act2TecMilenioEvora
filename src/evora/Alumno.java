@@ -6,6 +6,7 @@ public class Alumno {
         //PEDIR NOMBRE
         try (Scanner SC = new Scanner(System.in)) {
             //PEDIR NOMBRE
+            System.out.println("===CALIFICACIONES TECMILENIO===");
             System.out.println("INGRESA EL NOMBRE DEL ESTUDIANTE: ");
             String Nombre= SC.nextLine();
             
@@ -19,7 +20,7 @@ public class Alumno {
             //CALIFICACION PROMEDIO
             double Suma=0;
             for(int Cal: Calificaciones){
-                Suma+= Cal;
+                Suma+=Cal;
             }
             double Average= Suma/Calificaciones.length;
             
@@ -33,7 +34,7 @@ public class Alumno {
             else CalFinal='F';
             
             //IMPRIMIR CALIFICACIONES
-            System.out.println("\nNOMBRE DEL ESTUDIANTE: "+ Nombre);
+            System.out.println("NOMBRE DEL ESTUDIANTE: "+ Nombre);
             for(int i=0; i<Calificaciones.length; i++){
                 System.out.println("CALIFICACION "+ (i+1)+ ": "+ Calificaciones[i]);
             }

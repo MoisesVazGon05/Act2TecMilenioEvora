@@ -4,14 +4,14 @@ public class MainBaraja {
     public static void main(String[] args){
         Baraja deck= new Baraja();
         
-        deck.shuffle();
+        deck.Shuffle();
         System.out.println("\n*--HEAD--*");
-        deck.head();
+        deck.Head();
         
         System.out.println("\n*--PICK--*");
-        deck.pick();
+        deck.Pick();
         
         System.out.println("\n*--HAND--*");
-        deck.hand();
+        deck.Hand();
     }
 }

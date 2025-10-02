@@ -21,42 +21,42 @@ public class Baraja {
               default: color= "Negro";
           }
           for(int value=1; value<=13; value++){
-             cartas.add(new Carta(palo, color, value));
-          }
+              cartas.add(new Carta(palo, color, value));
+            }
       }
     }
     
-    public void shuffle(){
+    public void Shuffle(){
         Collections.shuffle(cartas);
-        System.out.println("Se Mezclo la Baraja");
+        System.out.println("Se Mezclo la Baraja.");
     }
     
-    public void head(){
+    public void Head(){
         if(!cartas.isEmpty()){
             Carta card= cartas.remove(0);
             System.out.println(card);
-            System.out.println("Quedan "+ cartas.size()+ " Cartas en La Baraja");
+            System.out.println("Quedan "+ cartas.size()+ " Cartas en La Baraja.");
         }
     }
     
-    public void pick(){
+    public void Pick(){
         Random rand= new Random();
         int index= rand.nextInt(cartas.size());
         Carta card= cartas.remove(index);
         System.out.println(card);
-        System.out.println("Quedan "+ cartas.size()+ " Cartas en La Baraja");
+        System.out.println("Quedan "+ cartas.size()+ " Cartas en La Baraja.");
     }
     
-    public void hand(){
+    public void Hand(){
         int n= Math.min(5, cartas.size());
         for(int i=0; i<n; i++){
             Carta card= cartas.remove(0);
             System.out.println(card);
         }
-        System.out.println("Quedan "+ cartas.size()+ " Cartas en La Baraja");
+        System.out.println("Quedan "+ cartas.size()+ " Cartas en La Baraja.");
     }
     
-    public int GetNumeroCartas(){
+    public int GetNumeroCartas(){ //DEVOLVER EL VALOR DE CARTAS RESTANTES.
         return cartas.size();
     }
 }

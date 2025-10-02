@@ -1,9 +1,9 @@
 package g37xcoupe;
 
 public class Carta {
-    private String palo;
-    private String color;
-    private int value;
+    private final String palo;
+    private final String color;
+    private final int value;
     
     public Carta(String palo, String color, int value){
         this.palo= palo;
