@@ -2,6 +2,7 @@ package mustangshelbygt500;
 import java.util.*;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
+import java.io.*;
 
 public class MainHospital {
     private static final Scanner SC= new Scanner(System.in);
@@ -11,7 +12,10 @@ public class MainHospital {
     private static int ContadorPacientes=1;
     private static int ContadorDoctores=1;
     
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException{
+        CargarPacientes();
+        CargarDoctores();
+        CargarCitas();
         int Option;
         do{
             System.out.println("=== MENU HOSPITAL ANGELES ===");
@@ -26,7 +30,7 @@ public class MainHospital {
             System.out.println("9. REPROGRAMAR CITA");
             System.out.println("10. CANCELAR CITA");
             System.out.println("0. SALIR");
-            System.out.println("POR FAVOR SELECIONE UNA OPCION:");
+            System.out.println("POR FAVOR SELECCIONE UNA OPCION:");
             Option= SC.nextInt();
             SC.nextLine();
             
@@ -40,14 +44,18 @@ public class MainHospital {
                 case 7-> ListarCitasDiarias();
                 case 8-> ListarCitasPorDoctor();
                 case 9-> ReprogramarCita();
-                case 10-> CancelarCita();
+                case 10->CancelarCita();
                 case 0-> System.out.println("SALIENDO..");
                 default-> System.out.println("OPCION INVALIDA.");
             }
         } while(Option!=0);
+        //GUARDAR LOS DATOS AL SALIR
+        GuardarPacientes();
+        GuardarDoctores();
+        GuardarCitas();
     }
     
-    private static void RegistrarPaciente(){
+    private static void RegistrarPaciente() throws IOException{
         System.out.println("INGRESE EL NOMBRE DEL PACIENTE:");
         String Nombre= SC.nextLine();
         System.out.println("INGRESE LA EDAD DEL PACIENTE:");
@@ -56,6 +64,7 @@ public class MainHospital {
         
         Paciente PA= new Paciente(ContadorPacientes, Nombre, Edad);
         Patients.add(PA);
+        GuardarPacientes();
         System.out.println("*PACIENTE REGISTRADO EXITOSAMENTE! ID: "+ ContadorPacientes+ "*");
         ContadorPacientes++; //INCREMENTAR VALOR
     }
@@ -233,5 +242,132 @@ public class MainHospital {
             System.out.println("NO SE ENCONTRO LA CITA CON ESE PACIENTE Y DOCTOR.");
         }
     }
-        
+    
+   
+   private static void CargarPacientes() throws IOException{
+       File Archivo= new File("db/Pacientes.txt");
+       if(!Archivo.exists()); //NO HACER NADA SI EXISTE
+        try (BufferedReader BR = new BufferedReader(new FileReader(Archivo))) {
+            String Linea;
+            while((Linea= BR.readLine())!= null){
+                String[] Datos= Linea.split(";");
+                int ID= Integer.parseInt(Datos[0]);
+                String Nombre= Datos[1];
+                int Edad= Integer.parseInt(Datos[2]);
+                Paciente PA= new Paciente(ID, Nombre, Edad);
+                Patients.add(PA);
+            }
+        }
+   }
+   
+      private static void GuardarPacientes() throws IOException{
+        try (BufferedWriter BW = new BufferedWriter(new FileWriter("db/Pacientes.txt"))) {
+            for(Paciente PA: Patients){
+                BW.write("Paciente: "+PA.getID()+". "+ PA.getNombre()+ "; Edad: "+ PA.getEdad());
+                BW.newLine();
+            }
+        }
+   }
+      
+   private static void CargarDoctores(){
+       File Archivo= new File("db/Doctores.txt");
+       if(!Archivo.exists()){
+           System.out.println("NO SE ENCONTRO EL ARHCIVO DE DOCTORES, SE CREARA AL GUARDAR.");
+       }
+       try(BufferedReader BR= new BufferedReader(new FileReader(Archivo))){
+           String Linea;
+           while((Linea= BR.readLine())!=null){
+               if(Linea.startsWith("Doctor:")){
+                   String[] Partes= Linea.split(";");
+                   int ID= Integer.parseInt(Partes[0].split(":")[1].trim());
+                   String Nombre= Partes[1].split(":")[1].trim();
+                   String Especialidad= Partes[2].split(":")[1].trim();
+                   Doctors.add(new Doctor(ID, Nombre, Especialidad));
+               }
+           }
+           System.out.println("DOCTORES CARGADOS CORRECTAMENTE");
+       } catch(IOException IOEX){
+           System.out.println("ERROR AL CARGAR DOCTORES: "+ IOEX.getMessage());
+       }
+   }
+   
+   private static void GuardarDoctores(){
+       File Carpeta= new File("db");
+       if(!Carpeta.exists()){
+           Carpeta.mkdirs(); //CREAR LA CARPETA SI NO EXISTE
+       }
+       try(BufferedWriter BW= new BufferedWriter(new FileWriter("db/Doctores.txt"))){
+           for(Doctor doc: Doctors){
+               BW.write("DOCTOR: "+ doc.getID()+ "; NOMBRE:"+ doc.getNombre()+ "; Especialidad: "+ doc.getSpeciality());
+               BW.newLine();
+           }
+           System.out.println("*DOCTORES GUARDADOS CORRECTAMENTE!*");
+       } catch(IOException IOEX){
+           System.out.println("ERROR AL GUARDAR DOCTORES: "+ IOEX.getMessage());
+       }
+    }
+   private static void CargarCitas() throws IOException{
+       try{
+           File Carpeta= new File("db");
+           if(!Carpeta.exists()) Carpeta.mkdir(); //CREAR CARPETA SI NO EXISTE
+           System.out.println("NO SE ENCONTRO EL ARHCIVO DE CITAS, SE CREARA AL GUARDAR.");
+           
+           File Archivo= new File(Carpeta, "Citas.txt");
+           if(!Archivo.exists()) Archivo.createNewFile();
+           
+           BufferedReader BR= new BufferedReader(new FileReader(Archivo));
+           String Linea;
+           while((Linea= BR.readLine())!= null){
+               //SEPARAR DATOS
+               String[] Partes= Linea.split(";");
+               
+               int IDPaciente= Integer.parseInt(Partes[1].split(":")[1].trim());
+               int IDDoctor= Integer.parseInt(Partes[2].split(":")[1].trim());
+               String Fecha= Partes[3].split(":")[1].trim();
+               String Horario= Partes[4].split(":")[1].trim();
+               
+               //BUSCAR PACIENTE & DOCTOR POR ID
+               Paciente paciente= null;
+               Doctor doctor= null;
+               for(Paciente P: Patients){
+                   if(P.getID()== IDPaciente){
+                       paciente= P;
+                       break;
+                   }
+               }
+               for(Doctor D: Doctors){
+                   if(D.getID()== IDDoctor){
+                       doctor= D;
+                       break;
+                   }
+               }
+               
+               if(paciente!= null && doctor!= null){
+                   Cita cita= new Cita(paciente, doctor, Fecha, Horario);
+                   Citas.add(cita);
+               }
+           }
+           BR.close();
+        } catch(IOException IOEX){
+           IOEX.printStackTrace();
+       }
+   }
+   
+   private static void GuardarCitas(){
+       File Carpeta= new File("db");
+       if(!Carpeta.exists()){
+           Carpeta.mkdirs(); //CREAR LA CARPETA SI NO EXISTE
+       }
+       
+       try(BufferedWriter BW= new BufferedWriter(new FileWriter("db/Citas.txt"))){
+           for(Cita CI: Citas){
+               BW.write("Cita:"+ CI.getPaciente().getID()+ ";"+ CI.getDoctor().getID()+";"+ CI.getFecha()+";"+ CI.getHorario());
+               BW.newLine();
+           }
+           System.out.println("*CITAS GUARDADAS CORRECTAMENTE.");
+       } catch(IOException IOEX){
+           System.out.println("ERROR AL GUARDAR CITAS: "+ IOEX.getMessage());
+       }
+   }
+   
 }
